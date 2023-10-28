@@ -13,14 +13,14 @@ const PLAYER_RESPAWN_TIME = 5000
 
 let latestTime = performance.now()
 
-wss.on('connection', function connection(ws: any) {
+wss.on('connection', function connection(ws: any, req: any) {
     ws.uuid = uuidv4()
     ws.noDelay = true
-    ws.send(JSON.stringify({ type: 'first', playerKey: ws.uuid, hp: 100, haveBeenHit: false }))
 
-    players.set(ws.uuid, {
-        hp: 100
-    })
+
+    /*     ws.send(JSON.stringify({ type: 'first', playerKey: ws.uuid, hp: 100, haveBeenHit: false }))
+     */
+
     ws.on('connected', function () {
         console.log('connected')
     })
@@ -64,12 +64,18 @@ wss.on('connection', function connection(ws: any) {
             players.set(clientData.playerKey, {
                 ...player,
                 position: [
-                    5,
-                    10,
-                    5
+                    1,
+                    1,
+                    1
                 ],
                 hp: 100,
                 animation: 'Idle'
+            })
+        } else if (clientData.type === 'FIRST_FROM_CLIENT') {
+            if (players.get(clientData.playerId)) return;
+            ws.uuid = clientData.playerId
+            players.set(ws.uuid, {
+                hp: clientData.hp
             })
         }
     });
