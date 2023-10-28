@@ -14,7 +14,7 @@ const PLAYER_RESPAWN_TIME = 5000
 let latestTime = performance.now()
 
 wss.on('connection', function connection(ws: any, req: any) {
-    ws.uuid = uuidv4()
+
     ws.noDelay = true
 
 
@@ -31,9 +31,8 @@ wss.on('connection', function connection(ws: any, req: any) {
     ws.on('message', function message(data: any) {
         const clientData = JSON.parse(data)
         const player = players.get(clientData.playerKey)
-/*         console.log('received:', clientData)
- */        if (clientData.type === 'SEND_PLAYER_INFO') {
-/*             if (player.hp < 1) clientData.animation = 'Death'
+        if (clientData.type === 'SEND_PLAYER_INFO') {
+            /*             if (player.hp < 1) clientData.animation = 'Death'
  */            players.set(clientData.playerKey, {
             ...player,
             position: [
@@ -74,7 +73,7 @@ wss.on('connection', function connection(ws: any, req: any) {
         } else if (clientData.type === 'FIRST_FROM_CLIENT') {
             if (players.get(clientData.playerId)) return;
             ws.uuid = clientData.playerId
-            players.set(ws.uuid, {
+            players.set(clientData.playerId, {
                 hp: clientData.hp
             })
         }
@@ -101,6 +100,3 @@ process.on('unhandledRejection', function (err: any) {
     console.error(err.stack)
     process.exit(1)
 })
-
-
-
