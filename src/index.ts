@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks'
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 8080 }) as any;
 
 interface Players {
     position: [number, number, number]
@@ -32,20 +32,24 @@ wss.on('connection', function connection(ws: any, req: any) {
         const clientData = JSON.parse(data)
         const player = players.get(clientData.playerKey)
         if (clientData.type === 'SEND_PLAYER_INFO') {
-            /*             if (player.hp < 1) clientData.animation = 'Death'
- */            players.set(clientData.playerKey, {
-            ...player,
-            position: [
-                clientData.position.x ?? 0,
-                clientData.position.y ?? 0,
-                clientData.position.z ?? 0
-            ],
-            velocity: [clientData.velocity.x, clientData.velocity.y, clientData.velocity.z],
-            rotation: clientData.rotation,
-            delta: clientData.delta,
-            animation: clientData.animation,
-            haveBeenHit: false
-        })
+            /*if (player.hp < 1) clientData.animation = 'Death'
+ */
+            if (clientData.position.y < -30) {
+                clientData.playerHP = 0
+            }
+            players.set(clientData.playerKey, {
+                ...player,
+                position: [
+                    clientData.position.x ?? 0,
+                    clientData.position.y ?? 0,
+                    clientData.position.z ?? 0
+                ],
+                velocity: [clientData.velocity.x, clientData.velocity.y, clientData.velocity.z],
+                rotation: clientData.rotation,
+                delta: clientData.delta,
+                animation: clientData.animation,
+                haveBeenHit: false
+            })
         } else if (clientData.type === 'PLAYER_HIT') {
             if (player.hp > 0) {
                 players.set(clientData.playerKey, {
@@ -74,7 +78,7 @@ wss.on('connection', function connection(ws: any, req: any) {
             if (players.get(clientData.playerId)) return;
             ws.uuid = clientData.playerId
             players.set(clientData.playerId, {
-                hp: clientData.hp
+                hp: clientData.hp ?? 100
             })
         }
     });
