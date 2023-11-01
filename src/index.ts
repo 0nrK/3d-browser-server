@@ -60,10 +60,15 @@ wss.on('connection', function connection(ws: any, req: any) {
                     hp: remainingHP,
                     haveBeenHit: true
                 })
-                ws.send(JSON.stringify({
-                    type: 'YOU_HAVE_BEEN_HIT',
-                    attackerRotation: clientData.attackerRotation
-                }))
+
+                ws.clients.forEach((client: any) => {
+                    if (client.uuid == clientData.hitBy) {
+                        client.send(JSON.stringify({
+                            type: 'YOU_HAVE_BEEN_HIT',
+                            attackerRotation: clientData.attackerRotation
+                        }))
+                    }
+                })
             } else if (remainingHP < 1) {
                 players.set(clientData.playerKey, {
                     ...player,
