@@ -17,7 +17,6 @@ wss.on('connection', function connection(ws: any, req: any) {
 
     ws.noDelay = true
 
-
     /*     ws.send(JSON.stringify({ type: 'first', playerKey: ws.uuid, hp: 100, haveBeenHit: false }))
      */
 
@@ -35,8 +34,11 @@ wss.on('connection', function connection(ws: any, req: any) {
             /*if (player.hp < 1) clientData.animation = 'Death'
  */
             if (clientData.position.y < -30) {
-                clientData.playerHP = 0
+                ws.send(JSON.stringify({
+                    type: 'DEATH'
+                }))
             }
+
             players.set(clientData.playerKey, {
                 ...player,
                 position: [
@@ -51,15 +53,21 @@ wss.on('connection', function connection(ws: any, req: any) {
                 haveBeenHit: false
             })
         } else if (clientData.type === 'PLAYER_HIT') {
-            if (player.hp > 0) {
+            const remainingHP = player.hp - Math.floor(Math.random() * 5 + 20) // random damage between 20-25
+            if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
-                    hp: player.hp - Math.floor(Math.random() * 5 + 20),// random damage between 20-25
+                    hp: remainingHP,
                     haveBeenHit: true
                 })
-            } else if (player.hp < 1) {
+                ws.send(JSON.stringify({
+                    type: 'YOU_HAVE_BEEN_HIT',
+                    attackerRotation: clientData.attackerRotation
+                }))
+            } else if (remainingHP < 1) {
                 players.set(clientData.playerKey, {
                     ...player,
+                    hp: remainingHP,
                     animation: 'Death'
                 })
             }
@@ -91,6 +99,13 @@ wss.on('connection', function connection(ws: any, req: any) {
     })
     function tick(timePassed: number) {
         latestTime = Date.now()
+        const player = players.get(ws.uuid)
+        if (player?.hp < 1) {
+            players.set(ws.uuid, {
+                ...player,
+                hp: 100
+            })
+        }
         ws.send(JSON.stringify(Array.from(players)));
     }
     setInterval(() => tick(Date.now() - latestTime), 1000 / TICKRATE)
