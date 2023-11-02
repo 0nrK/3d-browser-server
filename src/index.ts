@@ -61,8 +61,10 @@ wss.on('connection', function connection(ws: any, req: any) {
                     haveBeenHit: true
                 })
 
-                ws.clients.forEach((client: any) => {
-                    if (client.uuid == clientData.hitBy) {
+                console.log(wss.clients)
+                wss.clients.forEach((client: any) => {
+                    console.log(client)
+                    if (client.uuid == clientData.playerKey) {
                         client.send(JSON.stringify({
                             type: 'YOU_HAVE_BEEN_HIT',
                             attackerRotation: clientData.attackerRotation
@@ -72,8 +74,7 @@ wss.on('connection', function connection(ws: any, req: any) {
             } else if (remainingHP < 1) {
                 players.set(clientData.playerKey, {
                     ...player,
-                    hp: remainingHP,
-                    animation: 'Death'
+                    hp: remainingHP
                 })
             }
         } else if (clientData.type === 'RESPAWN_REQUEST') {
@@ -108,7 +109,8 @@ wss.on('connection', function connection(ws: any, req: any) {
         if (player?.hp < 1) {
             players.set(ws.uuid, {
                 ...player,
-                hp: 100
+                hp: 0,
+                animation: 'Death'
             })
         }
         ws.send(JSON.stringify(Array.from(players)));
