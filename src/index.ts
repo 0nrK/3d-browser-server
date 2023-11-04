@@ -7,7 +7,11 @@ interface Players {
     position: [number, number, number]
 }
 
-const players: any = new Map()
+const players: any = new Map(/* [
+    ['bot1', { hp: 100, isBot: true, position: [5, 1, 5] }],
+    ['bot2', { hp: 100, isBot: true, position: [15, 1, 15] }],
+    ['bot3', { hp: 100, isBot: true, position: [25, 1, 25] }]] */
+)
 const TICKRATE = 60
 const PLAYER_RESPAWN_TIME = 5000
 
@@ -57,13 +61,10 @@ wss.on('connection', function connection(ws: any, req: any) {
             if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
-                    hp: remainingHP,
-                    haveBeenHit: true
+                    hp: remainingHP
                 })
 
-                console.log(wss.clients)
                 wss.clients.forEach((client: any) => {
-                    console.log(client)
                     if (client.uuid == clientData.playerKey) {
                         client.send(JSON.stringify({
                             type: 'YOU_HAVE_BEEN_HIT',
@@ -75,6 +76,14 @@ wss.on('connection', function connection(ws: any, req: any) {
                 players.set(clientData.playerKey, {
                     ...player,
                     hp: remainingHP
+                })
+
+                wss.clients.forEach((client: any) => {
+                    if (client.uuid == clientData.hitBy) {
+                        client.send(JSON.stringify({
+                            type: 'YOU_KILLED_A_PLAYER',
+                        }))
+                    }
                 })
             }
         } else if (clientData.type === 'RESPAWN_REQUEST') {
@@ -113,6 +122,26 @@ wss.on('connection', function connection(ws: any, req: any) {
                 animation: 'Death'
             })
         }
+
+        /*    players.forEach((player: any) => {
+               if (!player?.isBot) return;
+               const botPosition = player?.position
+               let closest: number = 999
+               players.forEach((user: any) => {
+                   if (!user.position || botPosition) return;
+                   const distance = {
+                       x: Math.abs(botPosition[0] - user.position[0]),
+                       z: Math.abs(botPosition[2] - user.position[2])
+                   }
+                   const distanceVector = Math.floor(Math.sqrt(distance.x ** 2 + distance.z ** 2))
+                   if (distanceVector < closest) closest = distanceVector
+                   players.set(player.uuid, {
+                       ...player,
+                       closest
+                   })
+               }
+               )
+           }) */
         ws.send(JSON.stringify(Array.from(players)));
     }
     setInterval(() => tick(Date.now() - latestTime), 1000 / TICKRATE)
