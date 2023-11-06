@@ -57,7 +57,7 @@ wss.on('connection', function connection(ws: any, req: any) {
                 haveBeenHit: false
             })
         } else if (clientData.type === 'PLAYER_HIT') {
-            const remainingHP = player.hp - Math.floor(Math.random() * 5 + 20) // random damage between 20-25
+            const remainingHP = player.hp - Math.floor(Math.random() * 3 + 1) // random damage between 20-25
             if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
@@ -67,8 +67,7 @@ wss.on('connection', function connection(ws: any, req: any) {
                 wss.clients.forEach((client: any) => {
                     if (client.uuid == clientData.playerKey) {
                         client.send(JSON.stringify({
-                            type: 'YOU_HAVE_BEEN_HIT',
-                            attackerRotation: clientData.attackerRotation
+                            type: 'YOU_HAVE_BEEN_HIT'
                         }))
                     }
                 })
@@ -98,7 +97,9 @@ wss.on('connection', function connection(ws: any, req: any) {
                 animation: 'Idle'
             })
         } else if (clientData.type === 'FIRST_FROM_CLIENT') {
-            if (players.get(clientData.playerId)) return;
+            if (players.get(clientData.playerId)) {
+                return;
+            }
             ws.uuid = clientData.playerId
             players.set(clientData.playerId, {
                 hp: clientData.hp ?? 100
