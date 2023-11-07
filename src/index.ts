@@ -12,6 +12,16 @@ const players: any = new Map(/* [
     ['bot2', { hp: 100, isBot: true, position: [15, 1, 15] }],
     ['bot3', { hp: 100, isBot: true, position: [25, 1, 25] }]] */
 )
+
+/* const monsters: any = new Map([
+    ['slot1', { hp: 100, name: 'Skeleton', position: [5, -1, 1] }],
+    ['slot2', { hp: 100, name: 'Skeleton', position: [5, -1, 9] }],
+    ['slot3', { hp: 100, name: 'Skeleton', position: [1, -1, 23] }]
+])
+
+const eggs: any = new Map([
+    [uuidv4(), { hp: 100, name: 'Egg', position: [8, 0, 11] }]
+]) */
 const TICKRATE = 60
 const PLAYER_RESPAWN_TIME = 5000
 
@@ -100,11 +110,44 @@ wss.on('connection', function connection(ws: any, req: any) {
             if (players.get(clientData.playerId)) {
                 return;
             }
+
             ws.uuid = clientData.playerId
             players.set(clientData.playerId, {
                 hp: clientData.hp ?? 100
             })
-        }
+        } /* else if (clientData.type === 'MONSTER_HIT') {
+            const monster = monsters.get(clientData.monsterId)
+            if (!monster) return;
+            const remainingHP = monster.hp - Math.floor(Math.random() * 9 + 20)
+            if (remainingHP < 0) monsters.delete(clientData.monsterId)
+            monsters.set(clientData.monsterId, {
+                ...monster,
+                hp: remainingHP
+            })
+        } else if (clientData.type === 'EGG_HIT') {
+            const egg = eggs.get(clientData.eggId)
+            if (!egg) return;
+            const remainingHP = egg.hp - Math.floor(Math.random() * 3 + 5)
+            if (remainingHP < 0) {
+                eggs.delete(clientData.eggId)
+                setTimeout(() => {
+                    eggs.set(uuidv4(), { hp: 100, name: 'Egg', position: [8, 0, 11] })
+                }, 5000)
+            } else if (remainingHP % 5 == 0) monsters.set(uuidv4(), {
+                hp: 100,
+                name: 'Skeleton',
+                position: [
+                    egg.position.x + 2, 0, egg.position.z + 2
+                ]
+            })
+
+            if (remainingHP > 0 ){
+                eggs.set(clientData.eggId, {
+                    ...egg,
+                    hp: remainingHP
+                })
+            }
+        } */
     });
     /*  setInterval(() => {
          ws.send(JSON.stringify(Array.from(players)));
@@ -144,6 +187,8 @@ wss.on('connection', function connection(ws: any, req: any) {
                )
            }) */
         ws.send(JSON.stringify(Array.from(players)));
+    /*     ws.send(JSON.stringify({ monsters: Array.from(monsters), type: 'MONSTERS' }))
+        ws.send(JSON.stringify({ eggs: Array.from(eggs), type: 'EGGS' })) */
     }
     setInterval(() => tick(Date.now() - latestTime), 1000 / TICKRATE)
 });
