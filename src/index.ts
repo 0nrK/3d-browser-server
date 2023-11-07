@@ -115,7 +115,14 @@ wss.on('connection', function connection(ws: any, req: any) {
             players.set(clientData.playerId, {
                 hp: clientData.hp ?? 100
             })
-        } /* else if (clientData.type === 'MONSTER_HIT') {
+        } else if (clientData.type === 'MONSTER_KILLED') {
+            console.log('31')
+            ws.send(JSON.stringify({
+                "type": "SLOT_DROP",
+                drop: [{ id: 'Coin', quantity: 1 }]
+            }))
+        }
+        /* else if (clientData.type === 'MONSTER_HIT') {
             const monster = monsters.get(clientData.monsterId)
             if (!monster) return;
             const remainingHP = monster.hp - Math.floor(Math.random() * 9 + 20)
@@ -187,8 +194,8 @@ wss.on('connection', function connection(ws: any, req: any) {
                )
            }) */
         ws.send(JSON.stringify(Array.from(players)));
-    /*     ws.send(JSON.stringify({ monsters: Array.from(monsters), type: 'MONSTERS' }))
-        ws.send(JSON.stringify({ eggs: Array.from(eggs), type: 'EGGS' })) */
+        /*     ws.send(JSON.stringify({ monsters: Array.from(monsters), type: 'MONSTERS' }))
+            ws.send(JSON.stringify({ eggs: Array.from(eggs), type: 'EGGS' })) */
     }
     setInterval(() => tick(Date.now() - latestTime), 1000 / TICKRATE)
 });
