@@ -116,11 +116,22 @@ wss.on('connection', function connection(ws: any, req: any) {
                 hp: clientData.hp ?? 100
             })
         } else if (clientData.type === 'MONSTER_KILLED') {
-            console.log('31')
-            ws.send(JSON.stringify({
-                "type": "SLOT_DROP",
-                drop: [{ id: 'Coin', quantity: 1 }]
-            }))
+            if (clientData.slot == 'EGG') {
+                ws.send(JSON.stringify({
+                    "type": "SLOT_DROP",
+                    drop: [{ id: 'Coin', quantity: 3, exp: 3 }]
+                }))
+            } else {
+                ws.send(JSON.stringify({
+                    "type": "SLOT_DROP",
+                    drop: [{ id: 'Coin', quantity: 1, exp: 1 }]
+                }))
+            }
+        } else if (clientData.type === 'RED_POTION') {
+            players.set(ws.uuid, {
+                ...player,
+                hp: (player.hp + 10 > 100 ? 100 : player.hp + 10)
+            })
         }
         /* else if (clientData.type === 'MONSTER_HIT') {
             const monster = monsters.get(clientData.monsterId)
