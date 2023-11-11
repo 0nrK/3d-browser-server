@@ -44,6 +44,7 @@ wss.on('connection', function connection(ws: any, req: any) {
     ws.on('message', function message(data: any) {
         const clientData = JSON.parse(data)
         const player = players.get(clientData.playerKey)
+        if (!player) return;
         if (clientData.type === 'SEND_PLAYER_INFO') {
             /*if (player.hp < 1) clientData.animation = 'Death'
  */
