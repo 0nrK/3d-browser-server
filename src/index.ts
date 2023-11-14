@@ -67,7 +67,8 @@ wss.on('connection', function connection(ws: any, req: any) {
                 haveBeenHit: false
             })
         } else if (clientData.type === 'PLAYER_HIT') {
-            const remainingHP = player.hp - Math.floor(Math.random() * 7 + 20) // random damage between 20-25
+            const isHeadshot = clientData.hs
+            const remainingHP = player.hp - Math.floor(Math.random() * 7 + 20 * (isHeadshot ? 3 : 1)) // random damage between 20-25
             if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
