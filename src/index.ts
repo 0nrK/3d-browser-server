@@ -13,15 +13,15 @@ const players: any = new Map(/* [
     ['bot3', { hp: 100, isBot: true, position: [25, 1, 25] }]] */
 )
 
-/* const monsters: any = new Map([
+const monsters: any = new Map([
     ['slot1', { hp: 100, name: 'Skeleton', position: [5, -1, 1] }],
     ['slot2', { hp: 100, name: 'Skeleton', position: [5, -1, 9] }],
     ['slot3', { hp: 100, name: 'Skeleton', position: [1, -1, 23] }]
 ])
 
-const eggs: any = new Map([
+/* const eggs: any = new Map([
     [uuidv4(), { hp: 100, name: 'Egg', position: [8, 0, 11] }]
-]) */
+])  */
 const TICKRATE = 60
 const PLAYER_RESPAWN_TIME = 5000
 
@@ -68,7 +68,7 @@ wss.on('connection', function connection(ws: any, req: any) {
             })
         } else if (clientData.type === 'PLAYER_HIT') {
             const isHeadshot = clientData.hs
-            const remainingHP = player.hp - Math.floor(Math.random() * 7 + 20 * (isHeadshot ? 3 : 1)) // random damage between 20-25
+            const remainingHP = player.hp - (Math.floor(Math.random() * 7 + 20)) * (isHeadshot ? 3 : 1) // random damage between 20-25
             if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
@@ -87,7 +87,6 @@ wss.on('connection', function connection(ws: any, req: any) {
                     ...player,
                     hp: remainingHP
                 })
-
                 wss.clients.forEach((client: any) => {
                     if (client.uuid == clientData.hitBy) {
                         client.send(JSON.stringify({
@@ -134,7 +133,7 @@ wss.on('connection', function connection(ws: any, req: any) {
                 hp: (player.hp + 10 > 100 ? 100 : player.hp + 10)
             })
         }
-        /* else if (clientData.type === 'MONSTER_HIT') {
+        else if (clientData.type === 'MONSTER_HIT') {
             const monster = monsters.get(clientData.monsterId)
             if (!monster) return;
             const remainingHP = monster.hp - Math.floor(Math.random() * 9 + 20)
@@ -143,7 +142,7 @@ wss.on('connection', function connection(ws: any, req: any) {
                 ...monster,
                 hp: remainingHP
             })
-        } else if (clientData.type === 'EGG_HIT') {
+        } /* else if (clientData.type === 'EGG_HIT') {
             const egg = eggs.get(clientData.eggId)
             if (!egg) return;
             const remainingHP = egg.hp - Math.floor(Math.random() * 3 + 5)
@@ -160,13 +159,13 @@ wss.on('connection', function connection(ws: any, req: any) {
                 ]
             })
 
-            if (remainingHP > 0 ){
+            if (remainingHP > 0) {
                 eggs.set(clientData.eggId, {
                     ...egg,
                     hp: remainingHP
                 })
             }
-        } */
+        }  */
     });
     /*  setInterval(() => {
          ws.send(JSON.stringify(Array.from(players)));
