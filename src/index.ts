@@ -22,7 +22,7 @@ const monsters: any = new Map([
 /* const eggs: any = new Map([
     [uuidv4(), { hp: 100, name: 'Egg', position: [8, 0, 11] }]
 ])  */
-const TICKRATE = 60
+const TICKRATE = 45
 const PLAYER_RESPAWN_TIME = 5000
 
 let latestTime = performance.now()
@@ -31,8 +31,12 @@ wss.on('connection', function connection(ws: any, req: any) {
 
     ws.noDelay = true
 
-    /*     ws.send(JSON.stringify({ type: 'first', playerKey: ws.uuid, hp: 100, haveBeenHit: false }))
-     */
+    ws.send(JSON.stringify({
+        type: 'first',
+        playerKey: ws.uuid,
+        hp: 100,
+        haveBeenHit: false
+    }))
 
     ws.on('connected', function () {
         console.log('connected')
@@ -40,6 +44,13 @@ wss.on('connection', function connection(ws: any, req: any) {
 
     ws.on('error', console.error);
 
+    if (players.size > 1) {
+        wss.clients.forEach((client: any) => {
+            client.send(JSON.stringify({
+                type: 'GAME_START',
+            }))
+        })
+    }
 
     ws.on('message', function message(data: any) {
         const clientData = JSON.parse(data)
@@ -60,7 +71,11 @@ wss.on('connection', function connection(ws: any, req: any) {
                     clientData.position.y ?? 0,
                     clientData.position.z ?? 0
                 ],
-                velocity: [clientData.velocity.x, clientData.velocity.y, clientData.velocity.z],
+                velocity: [
+                    clientData.velocity.x,
+                    clientData.velocity.y,
+                    clientData.velocity.z
+                ],
                 rotation: clientData.rotation,
                 delta: clientData.delta,
                 animation: clientData.animation,
@@ -68,7 +83,8 @@ wss.on('connection', function connection(ws: any, req: any) {
             })
         } else if (clientData.type === 'PLAYER_HIT') {
             const isHeadshot = clientData.hs
-            const remainingHP = player.hp - (Math.floor(Math.random() * 7 + 20)) * (isHeadshot ? 3 : 1) // random damage between 20-25
+
+            const remainingHP = player.hp - (Math.floor(Math.random() * 7 + 18)) * (isHeadshot ? 3 : 1) // random damage between 20-25
             if (remainingHP > 0) {
                 players.set(clientData.playerKey, {
                     ...player,
